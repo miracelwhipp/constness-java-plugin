@@ -1,0 +1,3 @@
+= Constness Java Plugin
+
+a plugin for the java compiler to implement constness
