@@ -8,6 +8,7 @@ import io.github.miracelwhipp.constness.plugin.utility.CompilerTaskContext;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 
 public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTaskContext> {
@@ -17,11 +18,21 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTa
     @Override
     public Void visitVariable(VariableTree node, CompilerTaskContext compilerTaskContext) {
 
+        boolean isConst = compilerTaskContext.isConst(node);
+
         if (node.getType() instanceof PrimitiveTypeTree) {
 
-            if (compilerTaskContext.isConst(node)) {
+            if (isConst) {
 
                 compilerTaskContext.reportError("cannot declare primitive type as const", node);
+            }
+        }
+
+        if (!isConst && node.getInitializer() != null) {
+
+            if (compilerTaskContext.isConst(node.getInitializer())) {
+
+                compilerTaskContext.reportError("cannot assign const value to non const value", node.getInitializer());
             }
         }
 
@@ -38,6 +49,14 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTa
             if (context.isConst(node.getModifiers())) {
 
                 context.reportError("cannot declare constructor as const", node);
+            }
+        }
+
+        if (node.getModifiers().getFlags().contains(Modifier.STATIC)) {
+
+            if (context.isConst(element)) {
+
+                context.reportError("cannot declare static methods as const", node);
             }
         }
 

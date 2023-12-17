@@ -1,13 +1,14 @@
 
 import io.github.miracelwhipp.constness.test.ExampleBean;
 import io.github.miracelwhipp.constness.annotation.Const;
+import io.github.miracelwhipp.constness.annotation.ConstValue;
 import io.github.miracelwhipp.constness.annotation.ConstnessUtility;
 
 
 class BeanFactory {
 
 
-    @Const
+    @ConstValue
     public static ExampleBean make() {
 
         ExampleBean result = new ExampleBean();
@@ -21,7 +22,7 @@ class BeanFactory {
     public static void ladida() {
 
         @Const
-        ExampleBean first = make();
+        ExampleBean first = BeanFactory.make();
 
         first.getNumber();
 
@@ -29,7 +30,8 @@ class BeanFactory {
 
         ExampleBean second = ConstnessUtility.castConstAway(first);
 
-        second.setRecursion(make());
+        second.setRecursion(BeanFactory.make());
+//        second.setRecursion(make());
 
         second.setText("other");
 

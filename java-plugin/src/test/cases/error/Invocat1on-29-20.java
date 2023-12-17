@@ -12,10 +12,12 @@ class Simple {
         public void doIt() {
         }
 
+// tag::const-method[]
         @Const
-        public void doItConst() {
+        public Object method() {
+// end::const-method[]
+            return null;
         }
-
     }
 
     @Const
@@ -23,7 +25,7 @@ class Simple {
 
     public void something() {
 
-        simple.doItConst();
+        simple.method();
         simple.doIt();
     }
 }

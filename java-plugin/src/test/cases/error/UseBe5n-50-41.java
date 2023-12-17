@@ -21,9 +21,11 @@ class UseBean {
 
         }
 
-        @Const
-        public void doConst() {
-
+// tag::const-method[]
+        @ConstMethod
+        public Object method() {
+// end::const-method[]
+            return null;
         }
 
         @ConstMethod

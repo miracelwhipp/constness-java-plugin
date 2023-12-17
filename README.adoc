@@ -1,3 +1,158 @@
 = Constness Java Plugin
 
-This repository contains a plugin for the java compiler to implement constness.
+:icons: font
+
+The Java language contains the keyword `const`, but using it is a syntax error. According to the java language
+specification it is a keyword only to allow compilers to increase the quality of error messages in case this C\++
+keyword appears in a Java program. However, there were
+https://bugs.java.com/bugdatabase/view_bug?bug_id=4910043[some]
+https://bugs.java.com/bugdatabase/view_bug?bug_id=6336887[request]
+https://bugs.java.com/bugdatabase/view_bug?bug_id=6432147[to]
+https://bugs.java.com/bugdatabase/view_bug?bug_id=4211070[implement] the `const` feature the way it is in C++, which
+were not accepted.
+
+It is possible to implement this feature using annotations and a java compiler plugin, though. This is an attempt to
+do this.
+
+ifdef::env-github[]
+The complete documentation can be found https://miracelwhipp.github.io/constness-java-plugin[here]
+endif::[]
+ifndef::env-github[]
+
+== Approach
+
+Instead of using the `const` keyword the package `io.github.miracelwhipp.constness.annotation` defines the annotations
+
+* `Const`
+* `ConstMethod`
+* and `ConstValue`.
+
+All of them mark a syntactic element as const. While `Const` can be applied to
+every syntactic element on which constness may apply, `ConstMethod` may only be applied on methods, while `ConstValue`
+may only be applied on type uses. This way the return type or a method itself may be unambiguously marked as const.
+
+For example, the following method is marked a const as well as its return type, since `@Const` may be applied to methods
+as well as type uses.
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/Invocat1on-29-20.java[tag=const-method]
+----
+
+In the following case on the other hand, only the method is marked as const, since `@ConstMethod` can not be applied to
+type uses.
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/UseBe5n-50-41.java[tag=const-method]
+----
+
+Additionally, the return type can be marked as const as follows:
+[source,java]
+----
+include::java-plugin/src/test/cases/error/UseBe9n-49-41.java[tag=const-return-type]
+----
+
+Note that positioning the annotation `@ConstValue` directly before the return type makes the code more clearly.
+Note further, that the following code is semantically equivalent, since `@ConstValue` cannot be applied to methods:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/UseBe10n-49-45.java[tag=const-return-type]
+----
+
+=== Semantics
+
+As opposed to the keyword `final` that restricts write access to the fields, parameters or variables it is applied to, `@Const`
+restricts write access to every member of the field, parameter or variable it is applied to. When using this compiler
+plugin the java compiler will generate an error on every source code element that violates that.
+
+For example, the code
+
+[source,java,lines]
+----
+include::java-plugin/src/test/cases/error/S1mple-24-22.java[tag=const-write-access]
+----
+would produce a compile error on line 3, since in the context the parameter `value` is marked as const.
+
+Consider the following listing:
+[source,java]
+----
+include::java-plugin/src/test/cases/error/S9mple-38-24.java[tag=const-access]
+----
+Note that:
+
+<1> A non-const value may be assigned to a const variable.
+<2> The method above can be invoked with a const value given to the const parameter.
+<3> The method above can be invoked with a non-const value given to the const parameter.
+<4> Assuming the field `member` is public it can be assigned because `other` is non-const, even though it points to the same instance as `another`.
+<5> Assigning the field `member` on the variable `another` will still produce a compile error.
+<6> The const variable `another` can still be reassigned, since it is not declared `final`
+
+==== Methods
+
+A method marked as const, simply marks the instance it is called on as const as if the implicit parameter `this` would
+be marked as const.
+
+==== Details
+
+With the constness-plugin activated the java compiler creates errors in the following cases:
+
+===== Assignments
+
+* A member field of an instance that is marked as const is assigned a value to:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/S1mple-24-22.java[tag=const-write-access]
+----
+* A value that is marked as const is assigned to a value that is not marked as const:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/CastConstAway-11-18.java[tag=cast-const-away]
+----
+
+===== Methods
+* A method parameter that is not marked as const is assigned a value that is marked as const:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/AssignConstToParameter-12-28.java[tag=const-parameter]
+----
+
+* A method that is not marked as const is invoked on an instance marked as const:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/NonConstMethod-17-24.java[]
+----
+
+* In the body of the method that is marked as const, an instance field is assigned a value to:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/ConstMethod-11-15.java[]
+----
+
+===== Declarations
+
+* A static method is marked as const:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/StaticConstMethod-10-24.java[tag=method]
+----
+
+* A variable, field or parameter of a primitive type is declared const:
+
+[source,java]
+----
+include::java-plugin/src/test/cases/error/ConstPrimitive-7-9.java[tag=const-primitive]
+----
+
+
+
+endif::[]
+
+

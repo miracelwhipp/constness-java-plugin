@@ -119,6 +119,8 @@ public class ConstInCurrentContextTreeScanner extends BooleanTreeScanner<Compile
         return parent.accept(this, context);
     }
 
+
+
     @Override
     public Boolean visitCompilationUnit(CompilationUnitTree node, CompilerTaskContext compilerTaskContext) {
 
@@ -139,6 +141,21 @@ public class ConstInCurrentContextTreeScanner extends BooleanTreeScanner<Compile
     @Override
     public Boolean visitClass(ClassTree node, CompilerTaskContext compilerTaskContext) {
 
+        return false;
+    }
+
+    @Override
+    public Boolean visitAssert(AssertTree node, CompilerTaskContext compilerTaskContext) {
+        return false;
+    }
+
+    @Override
+    public Boolean visitNewClass(NewClassTree node, CompilerTaskContext compilerTaskContext) {
+        return false;
+    }
+
+    @Override
+    public Boolean visitNewArray(NewArrayTree node, CompilerTaskContext compilerTaskContext) {
         return false;
     }
 
@@ -244,21 +261,6 @@ public class ConstInCurrentContextTreeScanner extends BooleanTreeScanner<Compile
 
     @Override
     public Boolean visitThrow(ThrowTree node, CompilerTaskContext compilerTaskContext) {
-        return isParentConst(node, compilerTaskContext);
-    }
-
-    @Override
-    public Boolean visitAssert(AssertTree node, CompilerTaskContext compilerTaskContext) {
-        return isParentConst(node, compilerTaskContext);
-    }
-
-    @Override
-    public Boolean visitNewClass(NewClassTree node, CompilerTaskContext compilerTaskContext) {
-        return isParentConst(node, compilerTaskContext);
-    }
-
-    @Override
-    public Boolean visitNewArray(NewArrayTree node, CompilerTaskContext compilerTaskContext) {
         return isParentConst(node, compilerTaskContext);
     }
 
