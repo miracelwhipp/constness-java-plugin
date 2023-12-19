@@ -1,6 +1,7 @@
 = Constness Java Plugin
 
 :icons: font
+:source-highlighter: coderay
 
 The Java language contains the keyword `const`, but using it is a syntax error. According to the java language
 specification it is a keyword only to allow compilers to increase the quality of error messages in case this C\++
@@ -63,8 +64,8 @@ include::java-plugin/src/test/cases/error/UseBe10n-49-45.java[tag=const-return-t
 
 === Semantics
 
-As opposed to the keyword `final` that restricts write access to the fields, parameters or variables it is applied to, `@Const`
-restricts write access to every member of the field, parameter or variable it is applied to. When using this compiler
+As opposed to the keyword `final` that prohibits write access to the fields, parameters or variables it is applied to, `@Const`
+prohibits write access to every _member_ of the field, parameter or variable it is applied to. When using this compiler
 plugin the java compiler will generate an error on every source code element that violates that.
 
 For example, the code
