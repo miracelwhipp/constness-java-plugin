@@ -4,6 +4,8 @@
 :source-highlighter: coderay
 :toc: left
 
+:stylesheet: ./css/asciidoctor.css
+
 include::README.adoc[]
 
 == Approach
