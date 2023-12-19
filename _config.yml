@@ -1,5 +1,5 @@
 title: Constness Java Plugin
-theme: jekyll-theme-dinky
+theme: jekyll-theme-slate
 exclude:
   - LICENSE
   - README.adoc
