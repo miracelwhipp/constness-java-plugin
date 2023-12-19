@@ -4,6 +4,7 @@
 :source-highlighter: coderay
 :toc: left
 :stylesdir: css
+:linkcss:
 
 
 include::README.adoc[]
