@@ -1,7 +1,10 @@
 = Constness Java Plugin
 
 :title: Constness Java Plugin
-// :icons: font
+:icons: font
+:source-highlighter: coderay
+:toc: left
+
 //
 // ifndef::env-github[:source-highlighter: coderay]
 //
