@@ -8,5 +8,6 @@ group :jekyll_plugins do
   gem 'jekyll-asciidoc', '~> 3.0.0'
 #   gem 'jekyll-theme-slate', '~> 0.2.0'
 #   gem 'jekyll-theme-tactile', '~> 0.2.0'
-  gem 'jekyll-theme-midnight', '~> 0.2.0'
+#   gem 'jekyll-theme-midnight', '~> 0.2.0'
+  gem 'jekyll-theme-minimal', '~> 0.2.0'
 end
