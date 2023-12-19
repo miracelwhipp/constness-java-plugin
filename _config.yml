@@ -1,5 +1,5 @@
 title: Constness Java Plugin
-theme: jekyll-theme-slate
+#theme: jekyll-theme-slate
 exclude:
   - LICENSE
   - README.adoc
@@ -11,7 +11,7 @@ asciidoctor:
   base_dir: :docdir
   safe: unsafe
   attributes:
-#    stylesdir: css
-#    icons: font
-#    idseparator: _
-#    source-highlighter: coderay
+    stylesdir: css
+    icons: font
+    idseparator: _
+    source-highlighter: coderay
