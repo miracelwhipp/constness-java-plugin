@@ -1,4 +1,4 @@
-name: build commits jdk 11
+name: build commits jdk 17
 
 on:
   push:
