@@ -11,7 +11,7 @@ asciidoctor:
   base_dir: :docdir
   safe: unsafe
   attributes:
+    stylesdir: css
 #    icons: font
 #    idseparator: _
-#    stylesdir: css
 #    source-highlighter: coderay
