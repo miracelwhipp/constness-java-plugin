@@ -1,19 +1,19 @@
 = Constness Java Plugin
 
 :title: Constness Java Plugin
-:icons: font
-
-ifndef::env-github[:source-highlighter: coderay]
-
-ifndef::env-github[:toc: left]
-
-ifdef::env-github,env-browser[]
-:caution-caption: :fire:
-:important-caption: :exclamation:
-:note-caption: :paperclip:
-:tip-caption: :bulb:
-:warning-caption: :warning:
-endif::[]
+// :icons: font
+//
+// ifndef::env-github[:source-highlighter: coderay]
+//
+// ifndef::env-github[:toc: left]
+//
+// ifdef::env-github,env-browser[]
+// :caution-caption: :fire:
+// :important-caption: :exclamation:
+// :note-caption: :paperclip:
+// :tip-caption: :bulb:
+// :warning-caption: :warning:
+// endif::[]
 
 
 The Java language contains the keyword `const`, but using it is a syntax error. According to the java language
