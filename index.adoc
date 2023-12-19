@@ -1,40 +1,11 @@
-= Constness Java Plugin
-
 :title: Constness Java Plugin
 :icons: font
-:source-highlighter: coderay
+:source-highlighter: highlight.js
+// :source-highlighter: coderay
 :toc: left
 
-//
-// ifndef::env-github[:source-highlighter: coderay]
-//
-// ifndef::env-github[:toc: left]
-//
-// ifdef::env-github,env-browser[]
-// :caution-caption: :fire:
-// :important-caption: :exclamation:
-// :note-caption: :paperclip:
-// :tip-caption: :bulb:
-// :warning-caption: :warning:
-// endif::[]
 
-
-The Java language contains the keyword `const`, but using it is a syntax error. According to the java language
-specification it is a keyword only to allow compilers to increase the quality of error messages in case this C\++
-keyword appears in a Java program. However, there were
-https://bugs.java.com/bugdatabase/view_bug?bug_id=4910043[some]
-https://bugs.java.com/bugdatabase/view_bug?bug_id=6336887[request]
-https://bugs.java.com/bugdatabase/view_bug?bug_id=6432147[to]
-https://bugs.java.com/bugdatabase/view_bug?bug_id=4211070[implement] the `const` feature the way it is in C++, which
-were not accepted.
-
-It is possible to implement this feature using annotations and a java compiler plugin, though. This is an attempt to
-do this.
-
-ifdef::env-github[]
-The complete documentation can be found https://miracelwhipp.github.io/constness-java-plugin[here]
-endif::[]
-ifndef::env-github[]
+include::README.adoc[]
 
 == Approach
 
@@ -83,6 +54,8 @@ include::java-plugin/src/test/cases/error/UseBe10n-49-45.java[tag=const-return-t
 As opposed to the keyword `final` that prohibits write access to the fields, parameters or variables it is applied to, `@Const`
 prohibits write access to every _member_ of the field, parameter or variable it is applied to. When using this compiler
 plugin the java compiler will generate an error on every source code element that violates that.
+
+=== Variables
 
 For example, the code
 
@@ -167,9 +140,3 @@ include::java-plugin/src/test/cases/error/StaticConstMethod-10-24.java[tag=metho
 ----
 include::java-plugin/src/test/cases/error/ConstPrimitive-7-9.java[tag=const-primitive]
 ----
-
-
-
-endif::[]
-
-
