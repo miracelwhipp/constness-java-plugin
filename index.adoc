@@ -3,6 +3,7 @@
 // :source-highlighter: highlight.js
 :source-highlighter: coderay
 :toc: left
+:stylesdir: css
 
 
 include::README.adoc[]
