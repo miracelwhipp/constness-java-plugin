@@ -3,6 +3,8 @@
 :icons: font
 :source-highlighter: coderay
 
+ifndef::env-github[:toc:]
+
 The Java language contains the keyword `const`, but using it is a syntax error. According to the java language
 specification it is a keyword only to allow compilers to increase the quality of error messages in case this C\++
 keyword appears in a Java program. However, there were
