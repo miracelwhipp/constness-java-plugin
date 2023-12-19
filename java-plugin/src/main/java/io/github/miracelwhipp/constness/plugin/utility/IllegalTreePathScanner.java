@@ -268,33 +268,6 @@ public abstract class IllegalTreePathScanner<ReturnType, ParameterType> extends 
     }
 
     @Override
-    public ReturnType visitDefaultCaseLabel(DefaultCaseLabelTree node, ParameterType parameterType) {
-
-        throw new IllegalStateException();
-    }
-
-    @Override
-    public ReturnType visitConstantCaseLabel(ConstantCaseLabelTree node, ParameterType parameterType) {
-
-        throw new IllegalStateException();
-
-    }
-
-    @Override
-    public ReturnType visitPatternCaseLabel(PatternCaseLabelTree node, ParameterType parameterType) {
-
-        throw new IllegalStateException();
-
-    }
-
-    @Override
-    public ReturnType visitDeconstructionPattern(DeconstructionPatternTree node, ParameterType parameterType) {
-
-        throw new IllegalStateException();
-
-    }
-
-    @Override
     public ReturnType visitArrayAccess(ArrayAccessTree node, ParameterType parameterType) {
 
         throw new IllegalStateException();

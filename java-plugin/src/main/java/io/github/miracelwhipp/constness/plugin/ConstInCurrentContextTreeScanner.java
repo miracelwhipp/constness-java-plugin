@@ -6,7 +6,9 @@ import io.github.miracelwhipp.constness.plugin.utility.BooleanTreeScanner;
 import io.github.miracelwhipp.constness.plugin.utility.CompilerTaskContext;
 import io.github.miracelwhipp.constness.plugin.utility.LoadElementClass;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import java.lang.reflect.Executable;
 
 public class ConstInCurrentContextTreeScanner extends BooleanTreeScanner<CompilerTaskContext> {
@@ -306,26 +308,6 @@ public class ConstInCurrentContextTreeScanner extends BooleanTreeScanner<Compile
 
     @Override
     public Boolean visitBindingPattern(BindingPatternTree node, CompilerTaskContext compilerTaskContext) {
-        return isParentConst(node, compilerTaskContext);
-    }
-
-    @Override
-    public Boolean visitDefaultCaseLabel(DefaultCaseLabelTree node, CompilerTaskContext compilerTaskContext) {
-        return isParentConst(node, compilerTaskContext);
-    }
-
-    @Override
-    public Boolean visitConstantCaseLabel(ConstantCaseLabelTree node, CompilerTaskContext compilerTaskContext) {
-        return isParentConst(node, compilerTaskContext);
-    }
-
-    @Override
-    public Boolean visitPatternCaseLabel(PatternCaseLabelTree node, CompilerTaskContext compilerTaskContext) {
-        return isParentConst(node, compilerTaskContext);
-    }
-
-    @Override
-    public Boolean visitDeconstructionPattern(DeconstructionPatternTree node, CompilerTaskContext compilerTaskContext) {
         return isParentConst(node, compilerTaskContext);
     }
 
