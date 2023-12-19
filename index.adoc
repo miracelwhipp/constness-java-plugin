@@ -58,11 +58,11 @@ plugin the java compiler will generate an error on every source code element tha
 
 For example, the code
 
-[source,java,lines]
+[source,java]
 ----
 include::java-plugin/src/test/cases/error/S1mple-24-22.java[tag=const-write-access]
 ----
-would produce a compile error on line 3, since in the context the parameter `value` is marked as const.
+would produce a compile error, since in the context the parameter `value` is marked as const.
 
 Consider the following listing:
 [source,java]
