@@ -139,3 +139,19 @@ include::java-plugin/src/test/cases/error/StaticConstMethod-10-24.java[tag=metho
 ----
 include::java-plugin/src/test/cases/error/ConstPrimitive-7-9.java[tag=const-primitive]
 ----
+
+== Usage
+
+In order to use the plugin simply include the dependency
+`io.github.miracelwhipp.constness:constness-java-plugin:0.0.1`:
+
+[source,xml]
+----
+include::java-plugin/src/it/read-only-bean/pom.xml[tag=dependency]
+            <version>0.0.1</version>
+        </dependency>
+----
+
+It contains the annotation to mark source code elements as const and activates the compiler plugin, when the build is
+started.
+
