@@ -30,8 +30,8 @@ class BeanFactory {
 
         ExampleBean second = ConstnessUtility.castConstAway(first);
 
-        second.setRecursion(BeanFactory.make());
-//        second.setRecursion(make());
+//        second.setRecursion(BeanFactory.make());
+        second.setRecursion(make());
 
         second.setText("other");
 

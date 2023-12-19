@@ -103,6 +103,13 @@ public class CompilerTaskContext {
             return false;
         }
 
+//        if (element.getSimpleName().toString().equals("this")) {
+//
+//            Element containingElement = ContainingMethodTreeScanner.getContainingMethod(tree, this);
+//
+//            return isConst(containingElement);
+//        }
+
         return isConst(element);
     }
 
@@ -116,6 +123,9 @@ public class CompilerTaskContext {
     }
 
     public boolean isConst(Element element) {
+
+        // TODO: check for this!
+
 
         return AnnotationElementInheritance.getAnnotation(elements, MetaConst.class, element) != null;
     }

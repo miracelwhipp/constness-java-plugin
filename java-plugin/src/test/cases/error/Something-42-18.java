@@ -39,11 +39,11 @@ class Something {
     @Const
     public void constMethod() {
 
+        something(); // compile error
     }
 
     public void something() {
 
-        constMethod();
     }
 
     public void something(@Const Other value) {

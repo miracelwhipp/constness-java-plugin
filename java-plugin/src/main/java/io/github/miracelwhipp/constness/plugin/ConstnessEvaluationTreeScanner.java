@@ -2,14 +2,9 @@ package io.github.miracelwhipp.constness.plugin;
 
 import com.sun.source.tree.*;
 import com.sun.source.util.TreeScanner;
-import io.github.miracelwhipp.constness.annotation.MetaConst;
-import io.github.miracelwhipp.constness.plugin.utility.CompilerTaskContext;
+import io.github.miracelwhipp.constness.plugin.utility.*;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.element.*;
 
 public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTaskContext> {
 
@@ -18,7 +13,7 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTa
     @Override
     public Void visitVariable(VariableTree node, CompilerTaskContext compilerTaskContext) {
 
-        boolean isConst = compilerTaskContext.isConst(node);
+        boolean isConst = Constness.markedAsConst(node, compilerTaskContext);
 
         if (node.getType() instanceof PrimitiveTypeTree) {
 
@@ -30,13 +25,37 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTa
 
         if (!isConst && node.getInitializer() != null) {
 
-            if (compilerTaskContext.isConst(node.getInitializer())) {
-
-                compilerTaskContext.reportError("cannot assign const value to non const value", node.getInitializer());
-            }
+            checkAssignmentToNonConst(node.getInitializer(), compilerTaskContext);
         }
 
         return super.visitVariable(node, compilerTaskContext);
+    }
+
+    public void checkAssignmentToNonConst(Tree assignment, CompilerTaskContext context) {
+
+        if (Constness.isConstReference(assignment, context)) {
+
+            context.reportError("cannot assign const value to non const value", assignment);
+        }
+    }
+
+
+    @Override
+    public Void visitAssignment(AssignmentTree node, CompilerTaskContext context) {
+
+        Element assigneeElement = context.getElement(node.getVariable());
+
+        if (node.getExpression() != null && !Constness.markedAsConst(assigneeElement, context)) {
+
+            checkAssignmentToNonConst(node.getExpression(), context);
+        }
+
+        if (!ModifiabilityTreeScanner.isModifiable(node.getVariable(), context)) {
+
+            context.reportError("cannot assign value to variable that is member of a const object", node);
+        }
+
+        return super.visitAssignment(node, context);
     }
 
     @Override
@@ -64,55 +83,42 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTa
     }
 
     @Override
-    public Void visitAssignment(AssignmentTree node, CompilerTaskContext context) {
-
-        Element assigneeElement = context.getTrees().getElement(context.getPath(node.getVariable()));
-
-        Element assignmentElement = context.getTrees().getElement(context.getPath(node.getExpression()));
-
-        if (assignmentElement != null && !context.isConst(assigneeElement) && context.isConst(assignmentElement)) {
-
-            context.reportError("cannot assign const value to non const value", node);
-        }
-
-        if (ConstInCurrentContextTreeScanner.isConstInContext(node.getVariable(), context)) {
-
-            context.reportError("cannot assign value to variable that is member of a const object", node);
-        }
-
-        return super.visitAssignment(node, context);
-    }
-
-    @Override
     public Void visitMethodInvocation(MethodInvocationTree node, CompilerTaskContext context) {
-
-        if (node.getMethodSelect().toString().equals(KEYWORD_SUPER)) {
-
-            return null;
-        }
 
         Element methodElement = context.getTrees().getElement(context.getPath(node.getMethodSelect()));
 
-        if (
-                ConstInCurrentContextTreeScanner.isConstInContext(node.getMethodSelect(), context) &&
-                        !context.isConst(methodElement)
-        ) {
+        if (!Constness.markedAsConst(methodElement, context) && methodElement.getKind() != ElementKind.CONSTRUCTOR) {
 
-            context.reportError("cannot invoke non-const method in const context", node);
+            Element containingElement = ContainingElementTreeScanner.getContainingMethod(node, context);
+
+            if (containingElement != null && Constness.markedAsConst(containingElement, context)) {
+
+                context.reportError("cannot invoke non-const method in const context", node);
+            }
+
+            if (Constness.isConstReference(node.getMethodSelect(), context)) {
+
+                context.reportError("cannot invoke non-const method in const context", node);
+            }
         }
 
         if (!(methodElement instanceof ExecutableElement executableElement)) {
 
             context.reportWarning("unable to load method " + methodElement.getEnclosingElement().getSimpleName() + "." + node.getMethodSelect().toString() + " constness cannot be checked", node.getMethodSelect());
-            return null;
+
+            return super.visitMethodInvocation(node, context);
         }
+
+        int parameterSize = executableElement.getParameters().size();
 
         for (int index = 0; index < node.getArguments().size(); index++) {
 
             ExpressionTree argument = node.getArguments().get(index);
 
+            VariableElement parameter = parameterSize > index ? executableElement.getParameters().get(index) : executableElement.getParameters().get(parameterSize - 1);
+
             if (
-                    !context.isConst(executableElement.getParameters().get(index)) &&
+                    !context.isConst(parameter) &&
                             context.isConst(argument)
             ) {
 

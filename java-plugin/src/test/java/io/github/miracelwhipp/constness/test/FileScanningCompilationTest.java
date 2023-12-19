@@ -33,6 +33,7 @@ public class FileScanningCompilationTest {
         return Arrays.stream(files).map(file -> new Object[]{file}).collect(Collectors.toList()).toArray(Object[][]::new);
     }
 
+
     @DataProvider
     public static Object[][] okay() {
 

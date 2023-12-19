@@ -110,7 +110,7 @@ include::java-plugin/src/test/cases/error/S1mple-24-22.java[tag=const-write-acce
 
 [source,java]
 ----
-include::java-plugin/src/test/cases/error/CastConstAway-11-18.java[tag=cast-const-away]
+include::java-plugin/src/test/cases/error/CastConstAway-11-20.java[tag=cast-const-away]
 ----
 
 ===== Methods
