@@ -1,8 +1,4 @@
-package io.github.miracelwhipp.constness.plugin;
-
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.ModifiersTree;
-import io.github.miracelwhipp.constness.annotation.MetaConst;
+package io.github.miracelwhipp.constness.plugin.utility;
 
 import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.AnnotationMirror;
@@ -11,7 +7,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.AnnotatedType;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

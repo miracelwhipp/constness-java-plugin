@@ -3,8 +3,10 @@ package io.github.miracelwhipp.constness.plugin;
 import com.google.auto.service.AutoService;
 import com.sun.source.util.Plugin;
 import com.sun.source.util.TaskEvent;
-import io.github.miracelwhipp.constness.plugin.utility.CompilerTaskContext;
+import io.github.miracelwhipp.constness.plugin.api.ConstnessApi;
 import io.github.miracelwhipp.javac.extension.compiler.plugin.*;
+
+import java.io.IOException;
 
 @AutoService(Plugin.class)
 @PluginName("constness")
@@ -17,9 +19,9 @@ public class ConstnessJavacPlugin extends ReflectiveCompilerPlugin {
     }
 
     @After(TaskEvent.Kind.ANALYZE)
-    public void beforeAnalyze(TaskEvent event) {
+    public void afterAnalyze(TaskEvent event) {
 
-        CompilerTaskContext context = CompilerTaskContext.fromTask(getTask(), event);
+        ConstnessApi context = ConstnessApi.fromTask(getTask(), event);
 
         ConstnessEvaluationTreeScanner.checkSatisfaction(context);
     }

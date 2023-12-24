@@ -2,111 +2,108 @@ package io.github.miracelwhipp.constness.plugin;
 
 import com.sun.source.tree.*;
 import com.sun.source.util.TreeScanner;
+import io.github.miracelwhipp.constness.plugin.api.ConstnessApi;
+import io.github.miracelwhipp.constness.plugin.api.ContainingElementTreeScanner;
 import io.github.miracelwhipp.constness.plugin.utility.*;
 
 import javax.lang.model.element.*;
 
-public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTaskContext> {
+public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, ConstnessApi> {
 
     public static final String KEYWORD_SUPER = "super";
 
     @Override
-    public Void visitVariable(VariableTree node, CompilerTaskContext compilerTaskContext) {
+    public Void visitVariable(VariableTree node, ConstnessApi constnessApi) {
 
-        boolean isConst = Constness.markedAsConst(node, compilerTaskContext);
+        boolean isConst = constnessApi.marks().markedAsConst(node);
 
         if (node.getType() instanceof PrimitiveTypeTree) {
 
             if (isConst) {
 
-                compilerTaskContext.reportError("cannot declare primitive type as const", node);
+                constnessApi.getJavacApi().reportError("cannot declare primitive type as const", node);
             }
         }
 
         if (!isConst && node.getInitializer() != null) {
 
-            checkAssignmentToNonConst(node.getInitializer(), compilerTaskContext);
+            checkAssignmentToNonConst(node.getInitializer(), constnessApi);
         }
 
-        return super.visitVariable(node, compilerTaskContext);
+        return super.visitVariable(node, constnessApi);
     }
 
-    public void checkAssignmentToNonConst(Tree assignment, CompilerTaskContext context) {
+    public void checkAssignmentToNonConst(Tree assignment, ConstnessApi api) {
 
-        if (Constness.isConstReference(assignment, context)) {
+        if (api.context().isConstInContext(assignment)) {
 
-            context.reportError("cannot assign const value to non const value", assignment);
+            api.getJavacApi().reportError("cannot assign const value to non const value", assignment);
         }
     }
 
 
     @Override
-    public Void visitAssignment(AssignmentTree node, CompilerTaskContext context) {
+    public Void visitAssignment(AssignmentTree node, ConstnessApi api) {
 
-        Element assigneeElement = context.getElement(node.getVariable());
+        if (node.getExpression() != null && !api.marks().markedAsConst(node.getVariable())) {
 
-        if (node.getExpression() != null && !Constness.markedAsConst(assigneeElement, context)) {
-
-            checkAssignmentToNonConst(node.getExpression(), context);
+            checkAssignmentToNonConst(node.getExpression(), api);
         }
 
-        if (!ModifiabilityTreeScanner.isModifiable(node.getVariable(), context)) {
+        if (api.context().isImmutableInContext(node.getVariable())) {
 
-            context.reportError("cannot assign value to variable that is member of a const object", node);
+            api.getJavacApi().reportError("cannot assign value to variable that is member of a const object", node);
         }
 
-        return super.visitAssignment(node, context);
+        return super.visitAssignment(node, api);
     }
 
     @Override
-    public Void visitMethod(MethodTree node, CompilerTaskContext context) {
+    public Void visitMethod(MethodTree node, ConstnessApi api) {
 
-        Element element = context.getTrees().getElement(context.getPath(node));
+        Element element = api.getJavacApi().getElement(node);
 
         if (element.getKind() == ElementKind.CONSTRUCTOR) {
 
-            if (context.isConst(node.getModifiers())) {
+            if (api.marks().markedAsConst(node.getModifiers())) {
 
-                context.reportError("cannot declare constructor as const", node);
+                api.getJavacApi().reportError("cannot declare constructor as const", node);
             }
         }
 
         if (node.getModifiers().getFlags().contains(Modifier.STATIC)) {
 
-            if (context.isConst(element)) {
+            if (api.marks().markedAsConst(element)) {
 
-                context.reportError("cannot declare static methods as const", node);
+                api.getJavacApi().reportError("cannot declare static methods as const", node);
             }
         }
 
-        return super.visitMethod(node, context);
+        return super.visitMethod(node, api);
     }
 
     @Override
-    public Void visitMethodInvocation(MethodInvocationTree node, CompilerTaskContext context) {
+    public Void visitMethodInvocation(MethodInvocationTree node, ConstnessApi api) {
 
-        Element methodElement = context.getTrees().getElement(context.getPath(node.getMethodSelect()));
+        Element methodElement = api.getJavacApi().getElement(node.getMethodSelect());
 
-        if (!Constness.markedAsConst(methodElement, context) && methodElement.getKind() != ElementKind.CONSTRUCTOR) {
+        if (
+                !api.marks().markedAsConst(methodElement) &&
+                        methodElement.getKind() != ElementKind.CONSTRUCTOR &&
+                        !methodElement.getModifiers().contains(Modifier.STATIC)
+        ) {
 
-            Element containingElement = ContainingElementTreeScanner.getContainingMethod(node, context);
+            if (api.context().isNonConstInvocation(node)) {
 
-            if (containingElement != null && Constness.markedAsConst(containingElement, context)) {
-
-                context.reportError("cannot invoke non-const method in const context", node);
-            }
-
-            if (Constness.isConstReference(node.getMethodSelect(), context)) {
-
-                context.reportError("cannot invoke non-const method in const context", node);
+                api.getJavacApi().reportError("cannot invoke non-const method in const context", node);
             }
         }
 
         if (!(methodElement instanceof ExecutableElement executableElement)) {
 
-            context.reportWarning("unable to load method " + methodElement.getEnclosingElement().getSimpleName() + "." + node.getMethodSelect().toString() + " constness cannot be checked", node.getMethodSelect());
+            api.getJavacApi().reportWarning("unable to load method " + methodElement.getEnclosingElement().getSimpleName() + "." + node.getMethodSelect().toString() + " constness cannot be checked", node.getMethodSelect());
 
-            return super.visitMethodInvocation(node, context);
+            return super.visitMethodInvocation(node, api);
         }
 
         int parameterSize = executableElement.getParameters().size();
@@ -118,20 +115,20 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, CompilerTa
             VariableElement parameter = parameterSize > index ? executableElement.getParameters().get(index) : executableElement.getParameters().get(parameterSize - 1);
 
             if (
-                    !context.isConst(parameter) &&
-                            context.isConst(argument)
+                    !api.marks().markedAsConst(parameter) &&
+                            api.marks().markedAsConst(argument)
             ) {
 
-                context.reportError("cannot assign const value to non const parameter", node);
+                api.getJavacApi().reportError("cannot assign const value to non const parameter", node);
             }
         }
 
-        return super.visitMethodInvocation(node, context);
+        return super.visitMethodInvocation(node, api);
     }
 
-    public static void checkSatisfaction(CompilerTaskContext context) {
+    public static void checkSatisfaction(ConstnessApi api) {
 
-        context.getCompilationUnit().accept(new ConstnessEvaluationTreeScanner(), context);
+        api.getJavacApi().compilationUnit().accept(new ConstnessEvaluationTreeScanner(), api);
     }
 
 }

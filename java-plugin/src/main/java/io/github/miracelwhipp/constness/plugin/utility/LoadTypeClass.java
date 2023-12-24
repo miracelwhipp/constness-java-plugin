@@ -1,27 +1,29 @@
 package io.github.miracelwhipp.constness.plugin.utility;
 
+import io.github.miracelwhipp.constness.plugin.api.JavacApi;
+
 import javax.lang.model.type.*;
 
-public class LoadTypeClass implements TypeVisitor<Class<?>, CompilerTaskContext> {
+public class LoadTypeClass implements TypeVisitor<Class<?>, JavacApi> {
 
     private static final LoadTypeClass INSTANCE = new LoadTypeClass();
 
     private LoadTypeClass() {
     }
 
-    public static Class<?> load(TypeMirror type, CompilerTaskContext context) {
+    public static Class<?> load(TypeMirror type, JavacApi context) {
 
         return INSTANCE.visit(type, context);
     }
 
     @Override
-    public Class<?> visit(TypeMirror type, CompilerTaskContext context) {
+    public Class<?> visit(TypeMirror type, JavacApi context) {
 
         return type.accept(this, context);
     }
 
     @Override
-    public Class<?> visitPrimitive(PrimitiveType primitiveType, CompilerTaskContext context) {
+    public Class<?> visitPrimitive(PrimitiveType primitiveType, JavacApi context) {
 
         return switch (primitiveType.getKind()) {
             case BOOLEAN -> boolean.class;
@@ -37,13 +39,13 @@ public class LoadTypeClass implements TypeVisitor<Class<?>, CompilerTaskContext>
     }
 
     @Override
-    public Class<?> visitNull(NullType t, CompilerTaskContext context) {
+    public Class<?> visitNull(NullType t, JavacApi context) {
 
         throw new IllegalStateException();
     }
 
     @Override
-    public Class<?> visitArray(ArrayType arrayType, CompilerTaskContext context) {
+    public Class<?> visitArray(ArrayType arrayType, JavacApi context) {
 
         Class<?> result = arrayType.getComponentType().accept(this, context);
 
@@ -51,19 +53,19 @@ public class LoadTypeClass implements TypeVisitor<Class<?>, CompilerTaskContext>
     }
 
     @Override
-    public Class<?> visitDeclared(DeclaredType type, CompilerTaskContext context) {
+    public Class<?> visitDeclared(DeclaredType type, JavacApi context) {
 
         return LoadElementClass.load(type.asElement(), context);
     }
 
     @Override
-    public Class<?> visitError(ErrorType t, CompilerTaskContext context) {
+    public Class<?> visitError(ErrorType t, JavacApi context) {
 
         throw new IllegalStateException();
     }
 
     @Override
-    public Class<?> visitTypeVariable(TypeVariable type, CompilerTaskContext context) {
+    public Class<?> visitTypeVariable(TypeVariable type, JavacApi context) {
 
         TypeMirror upperBound = type.getUpperBound();
 
@@ -76,37 +78,37 @@ public class LoadTypeClass implements TypeVisitor<Class<?>, CompilerTaskContext>
     }
 
     @Override
-    public Class<?> visitWildcard(WildcardType t, CompilerTaskContext context) {
+    public Class<?> visitWildcard(WildcardType t, JavacApi context) {
 
         return Object.class;
     }
 
     @Override
-    public Class<?> visitExecutable(ExecutableType t, CompilerTaskContext context) {
+    public Class<?> visitExecutable(ExecutableType t, JavacApi context) {
 
         throw new IllegalStateException();
     }
 
     @Override
-    public Class<?> visitNoType(NoType t, CompilerTaskContext context) {
+    public Class<?> visitNoType(NoType t, JavacApi context) {
 
         throw new IllegalStateException();
     }
 
     @Override
-    public Class<?> visitUnknown(TypeMirror t, CompilerTaskContext context) {
+    public Class<?> visitUnknown(TypeMirror t, JavacApi context) {
 
         throw new IllegalStateException();
     }
 
     @Override
-    public Class<?> visitUnion(UnionType t, CompilerTaskContext context) {
+    public Class<?> visitUnion(UnionType t, JavacApi context) {
 
         throw new IllegalStateException();
     }
 
     @Override
-    public Class<?> visitIntersection(IntersectionType t, CompilerTaskContext context) {
+    public Class<?> visitIntersection(IntersectionType t, JavacApi context) {
 
         throw new IllegalStateException();
     }
