@@ -4,7 +4,6 @@ import com.sun.source.tree.*;
 import com.sun.source.util.TreeScanner;
 import io.github.miracelwhipp.constness.plugin.api.ConstnessApi;
 import io.github.miracelwhipp.constness.plugin.api.ContainingElementTreeScanner;
-import io.github.miracelwhipp.constness.plugin.utility.*;
 
 import javax.lang.model.element.*;
 
@@ -87,13 +86,9 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, ConstnessA
 
         Element methodElement = api.getJavacApi().getElement(node.getMethodSelect());
 
-        if (
-                !api.marks().markedAsConst(methodElement) &&
-                        methodElement.getKind() != ElementKind.CONSTRUCTOR &&
-                        !methodElement.getModifiers().contains(Modifier.STATIC)
-        ) {
+        if (isNonConstInvocation(api, methodElement, node)) {
 
-            if (api.context().isNonConstInvocation(node)) {
+            if (api.context().invocationIsInConstContext(node)) {
 
                 api.getJavacApi().reportError("cannot invoke non-const method in const context", node);
             }
@@ -124,6 +119,51 @@ public class ConstnessEvaluationTreeScanner extends TreeScanner<Void, ConstnessA
         }
 
         return super.visitMethodInvocation(node, api);
+    }
+
+    @Override
+    public Void visitReturn(ReturnTree node, ConstnessApi api) {
+
+        Element containingMethod = ContainingElementTreeScanner.getContainingMethod(node, api.getJavacApi());
+
+        if (!(containingMethod instanceof ExecutableElement executableElement)) {
+
+            api.getJavacApi().reportWarning("unable to locate surrounding method", node);
+            return super.visitReturn(node, api);
+        }
+
+        if (!api.marks().markedAsConst(executableElement.getReturnType())) {
+
+            checkAssignmentToNonConst(node.getExpression(), api);
+        }
+
+        return super.visitReturn(node, api);
+    }
+
+    private static boolean isNonConstInvocation(ConstnessApi api, Element methodElement, MethodInvocationTree node) {
+
+        if (methodElement.getKind() == ElementKind.CONSTRUCTOR) {
+
+            return false;
+        }
+
+        if (methodElement.getModifiers().contains(Modifier.STATIC)) {
+
+            return false;
+        }
+
+        if (api.marks().markedAsConst(methodElement)) {
+
+            return false;
+        }
+
+        if (!api.marks().markedAsPreservesConst(methodElement)) {
+
+            return true;
+        }
+
+        return !api.context().invocationIsInConstContext(node);
+
     }
 
     public static void checkSatisfaction(ConstnessApi api) {

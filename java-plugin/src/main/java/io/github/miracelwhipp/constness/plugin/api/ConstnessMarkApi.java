@@ -4,6 +4,7 @@ import com.sun.source.tree.AnnotationTree;
 import com.sun.source.tree.ModifiersTree;
 import com.sun.source.tree.Tree;
 import io.github.miracelwhipp.constness.annotation.MetaConst;
+import io.github.miracelwhipp.constness.annotation.PreservesConst;
 import io.github.miracelwhipp.constness.plugin.utility.AnnotationElementInheritance;
 
 import javax.lang.model.element.Element;
@@ -61,4 +62,32 @@ public class ConstnessMarkApi {
 
         return markedAsConst(element);
     }
+
+    public boolean markedAsPreservesConst(Element element) {
+
+        return AnnotationElementInheritance.getAnnotation(javacApi.elements(), PreservesConst.class, element) != null;
+    }
+
+    public boolean markedAsPreservesConst(TypeMirror type) {
+
+        return AnnotationElementInheritance.getAnnotation(javacApi.elements(), PreservesConst.class, type) != null;
+    }
+
+    public boolean markedAsPreservesConst(Tree tree) {
+
+        Element element = javacApi.getElement(tree);
+
+        if (element == null) {
+
+            return false;
+        }
+
+        return markedAsPreservesConst(element);
+    }
+
+    public boolean markedAsImmutable() {
+
+        return false; // TODO
+    }
+
 }

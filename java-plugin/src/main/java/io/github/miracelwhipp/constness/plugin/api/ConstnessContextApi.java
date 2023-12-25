@@ -2,7 +2,6 @@ package io.github.miracelwhipp.constness.plugin.api;
 
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
-import io.github.miracelwhipp.constness.plugin.utility.Constness;
 
 import javax.lang.model.element.Element;
 
@@ -24,12 +23,14 @@ public class ConstnessContextApi {
         return ImmutabilityTreeScanner.isImmutable(tree, markApi);
     }
 
-    public boolean isNonConstInvocation(MethodInvocationTree node) {
+    public boolean invocationIsInConstContext(MethodInvocationTree node) {
 
         // TODO: check all scopes using ScopesTreeScanner
         Element containingElement = ContainingElementTreeScanner.getContainingMethod(node, markApi.getJavacApi());
 
-        if (containingElement != null && markApi.markedAsConst(containingElement)) {
+        if (containingElement != null &&
+                (markApi.markedAsConst(containingElement) || markApi.markedAsPreservesConst(containingElement))
+        ) {
 
             return true;
         }

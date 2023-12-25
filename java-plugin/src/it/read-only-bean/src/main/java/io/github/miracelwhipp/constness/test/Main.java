@@ -10,18 +10,18 @@ public class Main {
         Address address = new Address("city", "street 1");
         Person person = new Person("firstName", "lastName", address);
 
-        address.setCity("otherCity");
+        person.getAddress().setCity("otherCity");
         person.setSurName("surName");
 
         @Const
-        Address addressCopy = address;
+        Address addressReference = address;
         @Const
-        Person personCopy = person;
+        Person personReference = person;
 
-        System.out.println(ConstnessUtility.castConstAway(addressCopy.getCity()));
-        System.out.println(ConstnessUtility.castConstAway(addressCopy.getStreet()));
-        System.out.println(ConstnessUtility.castConstAway(personCopy.getAddress().getCity()));
-        System.out.println(ConstnessUtility.castConstAway(personCopy.getAddress().getStreet()));
+        System.out.println(ConstnessUtility.castConstAway(addressReference.getCity()));
+        System.out.println(ConstnessUtility.castConstAway(addressReference.getStreet()));
+        System.out.println(ConstnessUtility.castConstAway(personReference.getAddress().getCity()));
+        System.out.println(ConstnessUtility.castConstAway(personReference.getAddress().getStreet()));
     }
 
 }

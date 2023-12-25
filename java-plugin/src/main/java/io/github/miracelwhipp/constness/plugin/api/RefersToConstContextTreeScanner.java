@@ -24,13 +24,12 @@ public final class RefersToConstContextTreeScanner extends BooleanTreeScanner<Co
     @Override
     public Boolean visitMemberSelect(MemberSelectTree node, ConstnessMarkApi constnessApi) {
 
-
-        if (node.getExpression().accept(this, constnessApi)) {
+        if (constnessApi.markedAsConst(node)) {
 
             return true;
         }
 
-        return constnessApi.markedAsConst(node);
+        return node.getExpression().accept(this, constnessApi);
     }
 
     @Override
@@ -42,7 +41,7 @@ public final class RefersToConstContextTreeScanner extends BooleanTreeScanner<Co
     @Override
     public Boolean visitMethod(MethodTree node, ConstnessMarkApi constnessApi) {
 
-        return constnessApi.markedAsConst(node);
+        return constnessApi.markedAsConst(node) || constnessApi.markedAsPreservesConst(node);
     }
 
     @Override
@@ -62,10 +61,23 @@ public final class RefersToConstContextTreeScanner extends BooleanTreeScanner<Co
             if (methodTree == null) {
 
                 // method is part of different compilation unit - load method by reflection
-                return hasConstReturnType(executableElement, constnessApi);
+                // return type annotations seem not to be evaluated correctly otherwise
+                if (hasConstReturnType(executableElement, constnessApi)) {
+
+                    return true;
+                }
+
+            } else if (constnessApi.markedAsConst(executableElement.getReturnType())) {
+
+                return true;
             }
 
-            return constnessApi.markedAsConst(executableElement.getReturnType());
+            if (!constnessApi.markedAsPreservesConst(element)) {
+
+                return false;
+            }
+
+            return node.getMethodSelect().accept(this, constnessApi);
         }
 
         return super.visitMethodInvocation(node, constnessApi);
@@ -74,11 +86,6 @@ public final class RefersToConstContextTreeScanner extends BooleanTreeScanner<Co
     private boolean hasConstReturnType(ExecutableElement executableElement, ConstnessMarkApi api) {
 
         String methodName = executableElement.getSimpleName().toString();
-
-//        if (methodName.equals("<init>")) {
-//
-//            return false;
-//        }
 
         Element enclosingElement = executableElement.getEnclosingElement();
 
