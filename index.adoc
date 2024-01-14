@@ -6,6 +6,10 @@
 
 include::README.adoc[]
 
+== Constness
+
+C++ introduces the concept of a reference to a constant instance. The state of such an instance must not be changed. The state of an object is the value of all its mebers and the state of each non-primitive member. It is however possible to assign non-const references to const references, but not vice versa. So a reference to constant instance may be seen as a read-only view of an object.
+
 == Approach
 
 Instead of using the `const` keyword the package `io.github.miracelwhipp.constness.annotation` defines the annotations
